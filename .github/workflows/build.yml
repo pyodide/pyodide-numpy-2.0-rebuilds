@@ -53,16 +53,7 @@ jobs:
             pyodide_checkout/dist/*.whl
           key: pyodide-packages-${{ hashFiles('pyodide_checkout/packages/recipes/**/*.yaml') }}
 
-      # Split Pyodide and packages builds because building the snapshot
-      # for the first time can fail on some occasions
-      - name: Build Pyodide distribution
-        working-directory: pyodide_checkout/
-        run: |
-          source pyodide_env.sh
-          ccache -z
-          PYODIDE_CORES=$(nproc)
-          PYODIDE_JOBS="${PYODIDE_CORES}" make
-          ccache -s
+      - run: echo "PYODIDE_JOBS=$(nproc)" >> "$GITHUB_ENV"
 
       - name: Build Pyodide packages with NumPy v2 enabled
         working-directory: pyodide_checkout/
@@ -70,7 +61,10 @@ jobs:
           source pyodide_env.sh
           ccache -z
           PYODIDE_CORES=$(nproc)
-          PYODIDE_JOBS="${PYODIDE_CORES}" PYODIDE_PACKAGES="pyarrow,lightgbm" make
+          make -C emsdk
+          make -C cpython
+          pip install -e ./pyodide-build
+          pyodide build-recipes "pyarrow,lightgbm" --install
           ccache -s
 
       - name: Save ccached outputs
