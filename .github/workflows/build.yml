@@ -50,6 +50,7 @@ jobs:
           path: |
             pyodide_checkout/packages/.libs/*
             pyodide_checkout/packages/.artifacts/*
+            pyodide_checkout/dist/*.whl
           key: pyodide-packages-${{ hashFiles('pyodide_checkout/packages/recipes/**/*.yaml') }}
 
       # Split Pyodide and packages builds because building the snapshot
