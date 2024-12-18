@@ -50,15 +50,20 @@ jobs:
           path: |
             pyodide_checkout/packages/.libs/*
             pyodide_checkout/packages/.artifacts/*
+            pyodide_checkout/dist/*.whl
           key: pyodide-packages-${{ hashFiles('pyodide_checkout/packages/recipes/**/*.yaml') }}
 
-      - name: Build Pyodide distribution with NumPy v2 enabled
+      - run: echo "PYODIDE_JOBS=$(nproc)" >> "$GITHUB_ENV"
+
+      - name: Build Pyodide packages with NumPy v2 enabled
         working-directory: pyodide_checkout/
         run: |
           source pyodide_env.sh
           ccache -z
-          PYODIDE_CORES=$(nproc)
-          PYODIDE_JOBS="${PYODIDE_CORES}" PYODIDE_PACKAGES="pyarrow,lightgbm" make
+          make -C emsdk
+          make -C cpython
+          pip install -e ./pyodide-build
+          pyodide build-recipes "pyarrow,lightgbm" --install
           ccache -s
 
       - name: Save ccached outputs
@@ -67,11 +72,13 @@ jobs:
           path: /tmp/ccache
           key: ccache-${{ hashFiles('Makefile.envs') }}
 
-      - name: Upload Pyodide distribution with PyArrow and LightGBM wheels
+      - name: Upload PyArrow and LightGBM wheels
         uses: actions/upload-artifact@6f51ac03b9356f520e9adb1b1b7802705f340c2b # v4.5.0
         with:
-          name: pyodide-with-packages-pyarrow-lightgbm
-          path: pyodide_checkout/dist/*
+          name: pyarrow-lightgbm-wheels
+          path: |
+            pyodide_checkout/dist/packages/pyarrow-*.whl
+            pyodide_checkout/dist/packages/lightgbm-*.whl
           if-no-files-found: error
           retention-days: 1
 
@@ -91,11 +98,11 @@ jobs:
     steps:
       - uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
         with:
-          name: packages-pyarrow-lightgbm-artifact
+          name: pyarrow-lightgbm-wheels
           path: dist
           merge-multiple: true
 
-      - name: Copy PyArrow and LightGBM wheels from Pyodide distribution artifact
+      - name: Copy PyArrow and LightGBM wheels from artifacts
         run: |
           mkdir -p packages
           cp dist/packages/pyarrow-*.whl packages/
@@ -127,4 +134,4 @@ jobs:
           files: |
             packages/*.whl
           fail_on_unmatched_files: true
-          name: PyArrow and LightGBM wheels, built against NumPy v2 via Pyodide gh-4925
+          name: PyArrow and LightGBM wheels, built against NumPy 2.0 via Pyodide gh-4925
