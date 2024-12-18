@@ -1,5 +1,8 @@
 # pyodide-numpy-2.0-rebuilds
 
+> [!TIP]
+> The PyArrow recipe is accredited to [`@joemarshall`'s work](https://github.com/joemarshall/pyarrow-pyodide).
+
 Rebuilds against NumPy v2 for certain Pyodide packages. Please see [pyodide/pyodide#4925][1]
 and the [Releases section for this repository][2] for more information.
 
