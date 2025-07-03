@@ -1,5 +1,9 @@
 # pyodide-numpy-2.0-rebuilds
 
+> [!IMPORTANT]
+> This repository has been archived and is no longer ascertained to be necessary, as all packages
+> in the Pyodide distribution are built against NumPy>=2.0.0 post the Pyodide 0.27 release.
+
 > [!TIP]
 > The PyArrow recipe is accredited to [`@joemarshall`'s work](https://github.com/joemarshall/pyarrow-pyodide).
 
